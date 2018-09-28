@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <style>
+        #canvas {
+               border: 1px solid #d3d3d3; 
+        }
+        
+        .paused #canvas {
+               border: 2px dashed red; 
+        }
+    </style>
+    <canvas id="canvas" width="800" height="800"></canvas>
+    <div style="
+    display: inline;
+    position: absolute;
+    margin-left: 10px;
+    ">
+        <div>
+        <p>Flow field options:</p>
+            <input type="checkbox" id="FlowAwayFromSwarmer" onclick="changeOption(this)"> Away from swarmers<br>
+            <input type="checkbox" id="FlowTowardsMouse" onclick="changeOption(this)"> Towards mouse<br>
+            <input type="checkbox" id="FlowAwayFromMouse" onclick="changeOption(this)"> Away from mouse<br>
+            <input type="checkbox" id="FlowAwayFromScreen" onclick="changeOption(this)"> Away from screen<br>
+        </div>
+        <hr>
+        <div>
+        <p>Swarmer options options:</p>
+            <input type="checkbox" id="SwarmAwayFromSwarmer" onclick="changeOption(this)" checked> Away from swarmers<br>
+            <input type="checkbox" id="SwarmTowardsMouse" onclick="changeOption(this)"> Towards mouse<br>
+            <input type="checkbox" id="SwarmAwayFromMouse" onclick="changeOption(this)"> Away from mouse<br>
+            <input type="checkbox" id="SwarmAwayFromScreen" onclick="changeOption(this)" checked> Away from screen<br>
+            <input type="checkbox" id="SwarmWander" onclick="changeOption(this)" checked> Wander<br>
+        </div>
+        <div>
+        <p>Simulation options:</p>
+            <input type="checkbox" id="DebugForces" onclick="changeOption(this)" checked> Debug forces<br>
+            Simulations per frame: <input type="text" value="1" id="SimulationsPerFrame" oninput="changeOption(this)" checked><br>
+            Time scale: <input type="text" value="5" id="TimeScale" oninput="changeOption(this)" checked><br>
+            Swarmer rotation speed: <input type="text" value="3" id="SwarmerRotationSpeed" oninput="changeOption(this)" checked><br>
+        </div>
+    </div>
+    <script src="lib/boids.js"></script>
+</body>
+</html>
