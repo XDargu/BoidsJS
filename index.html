@@ -1,45 +1,170 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boids Simulator</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    margin:0;
+    background:#0f1117;
+    color:white;
+    font-family:Arial;
+}
+
+.app{
+    display:flex;
+    gap:20px;
+    padding:12px;
+    align-items:flex-start;
+}
+
+#canvas{
+    width:min(100vw - 24px, 800px);
+    height:auto;
+    aspect-ratio:1/1;
+    border-radius:14px;
+    border:1px solid #333;
+    background:#111;
+}
+
+.paused #canvas{
+    outline:3px solid #ff5a5a;
+}
+
+.panel{
+    width:340px;
+    max-width:100%;
+    background:#161b22;
+    border-radius:14px;
+    padding:14px;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    min-height:44px;
+}
+
+input[type=range]{
+    flex:1;
+}
+
+input[type=checkbox]{
+    transform:scale(1.4);
+}
+
+@media (max-width:900px){
+
+    .app{
+        flex-direction:column;
+    }
+
+    .panel{
+        width:100%;
+    }
+}
+</style>
+</head>
+
 <body>
-    <style>
-        #canvas {
-               border: 1px solid #d3d3d3; 
-        }
-        
-        .paused #canvas {
-               border: 2px dashed red; 
-        }
-    </style>
-    <canvas id="canvas" width="800" height="800"></canvas>
-    <div style="
-    display: inline;
-    position: absolute;
-    margin-left: 10px;
-    ">
-        <div>
-        <p>Flow field options:</p>
-            <input type="checkbox" id="FlowAwayFromSwarmer" onclick="changeOption(this)"> Away from swarmers<br>
-            <input type="checkbox" id="FlowTowardsMouse" onclick="changeOption(this)"> Towards mouse<br>
-            <input type="checkbox" id="FlowAwayFromMouse" onclick="changeOption(this)"> Away from mouse<br>
-            <input type="checkbox" id="FlowAwayFromScreen" onclick="changeOption(this)"> Away from screen<br>
+
+    <div class="app">
+
+        <div class="canvas-wrap">
+            <canvas id="canvas" width="800" height="800"></canvas>
         </div>
-        <hr>
-        <div>
-        <p>Swarmer options options:</p>
-            <input type="checkbox" id="SwarmAwayFromSwarmer" onclick="changeOption(this)" checked> Away from swarmers<br>
-            <input type="checkbox" id="SwarmTowardsMouse" onclick="changeOption(this)"> Towards mouse<br>
-            <input type="checkbox" id="SwarmAwayFromMouse" onclick="changeOption(this)"> Away from mouse<br>
-            <input type="checkbox" id="SwarmAwayFromScreen" onclick="changeOption(this)" checked> Away from screen<br>
-            <input type="checkbox" id="SwarmWander" onclick="changeOption(this)" checked> Wander<br>
-        </div>
-        <div>
-        <p>Simulation options:</p>
-            <input type="checkbox" id="DebugForces" onclick="changeOption(this)" checked> Debug forces<br>
-            Simulations per frame: <input type="text" value="1" id="SimulationsPerFrame" oninput="changeOption(this)" checked><br>
-            Time scale: <input type="text" value="5" id="TimeScale" oninput="changeOption(this)" checked><br>
-            Swarmer rotation speed: <input type="text" value="3" id="SwarmerRotationSpeed" oninput="changeOption(this)" checked><br>
+
+        <div class="panel">
+
+            <h1>Boids Simulator</h1>
+
+            <div class="group">
+                <h2>Simulation</h2>
+
+                <div class="row">
+                    <label>Debug Forces</label>
+                    <input type="checkbox" id="DebugForces" checked onclick="changeOption(this)">
+                </div>
+
+                <div class="row">
+                    <label>Time Scale</label>
+                    <input type="range" min="1" max="20" value="5" id="TimeScale"
+                        oninput="syncValue(this); changeOption(this)">
+                    <span class="value">5</span>
+                </div>
+
+                <div class="row">
+                    <label>Steps / Frame</label>
+                    <input type="range" min="1" max="20" value="1" id="SimulationsPerFrame"
+                        oninput="syncValue(this); changeOption(this)">
+                    <span class="value">1</span>
+                </div>
+
+                <div class="row">
+                    <label>Turn Speed</label>
+                    <input type="range" min="1" max="10" step="0.1" value="3" id="SwarmerRotationSpeed"
+                        oninput="syncValue(this); changeOption(this)">
+                    <span class="value">3</span>
+                </div>
+            </div>
+
+            <div class="group">
+                <h2>Swarmer Forces</h2>
+
+                <div class="row"><label>Away from swarmers</label><input type="checkbox" id="SwarmAwayFromSwarmer"
+                        checked onclick="changeOption(this)"></div>
+                <div class="row"><label>Towards mouse</label><input type="checkbox" id="SwarmTowardsMouse"
+                        onclick="changeOption(this)"></div>
+                <div class="row"><label>Away from mouse</label><input type="checkbox" id="SwarmAwayFromMouse"
+                        onclick="changeOption(this)"></div>
+                <div class="row"><label>Border avoid</label><input type="checkbox" id="SwarmAwayFromScreen" checked
+                        onclick="changeOption(this)"></div>
+                <div class="row"><label>Wander</label><input type="checkbox" id="SwarmWander" checked
+                        onclick="changeOption(this)"></div>
+
+            </div>
+
+            <div class="group">
+                <h2>Flow Field</h2>
+
+                <div class="row"><label>Away from swarmers</label><input type="checkbox" id="FlowAwayFromSwarmer"
+                        checked onclick="changeOption(this)"></div>
+                <div class="row"><label>Towards mouse</label><input type="checkbox" id="FlowTowardsMouse"
+                        onclick="changeOption(this)"></div>
+                <div class="row"><label>Away from mouse</label><input type="checkbox" id="FlowAwayFromMouse"
+                        onclick="changeOption(this)"></div>
+                <div class="row"><label>Border avoid</label><input type="checkbox" id="FlowAwayFromScreen"
+                        checked  onclick="changeOption(this)"></div>
+
+            </div>
+
+            <div class="group">
+                <h2>Status</h2>
+                <div class="stats">
+                    <div>Pause: <span class="badge">F</span></div>
+                    <div>Step: <span class="badge">G</span></div>
+                </div>
+            </div>
+
         </div>
     </div>
+
+    <script>
+        function syncValue(el) {
+            el.parentElement.querySelector('.value').textContent = el.value;
+        }
+    </script>
+
     <script src="lib/boids.js"></script>
 </body>
 </html>
